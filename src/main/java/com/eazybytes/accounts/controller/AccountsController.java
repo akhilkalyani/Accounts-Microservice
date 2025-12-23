@@ -4,19 +4,27 @@ import com.eazybytes.accounts.constants.AccountsConstants;
 import com.eazybytes.accounts.dto.CustomerDTO;
 import com.eazybytes.accounts.dto.ResponseDTO;
 import com.eazybytes.accounts.service.IAccountsService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api")
 @AllArgsConstructor
+@Validated
 public class AccountsController {
     private final IAccountsService accountsService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> createAccount(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> createAccount(
+            @Valid
+            @RequestBody CustomerDTO customerDTO) {
         accountsService.createAccount(customerDTO);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -24,7 +32,11 @@ public class AccountsController {
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<CustomerDTO> fetchAccountDetailsByMobileNumber(@RequestParam int mobileNumber) {
+    public ResponseEntity<CustomerDTO> fetchAccountDetailsByMobileNumber(
+            @Min(value = 1000000000L, message = "Mobile no should be 10 digits long")
+            @Max(value = 9999999999L, message = "Mobile no should be 10 digits long")
+            @RequestParam
+            int mobileNumber) {
         CustomerDTO customerDTO = accountsService.fetchAccountDetailsByMobileNumber(mobileNumber);
         return ResponseEntity
                 .status(HttpStatus.FOUND)
@@ -32,7 +44,10 @@ public class AccountsController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ResponseDTO> updateAccount(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> updateAccount(
+            @Valid
+            @RequestBody
+            CustomerDTO customerDTO) {
         if (accountsService.updateAccount(customerDTO)) {
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -45,7 +60,10 @@ public class AccountsController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseDTO> deleteAccount(@RequestParam int mobileNumber){
+    public ResponseEntity<ResponseDTO> deleteAccount(
+            @Min(value = 1000000000L, message = "Mobile no should be 10 digits long")
+            @Max(value = 9999999999L, message = "Mobile no should be 10 digits long")
+            @RequestParam int mobileNumber){
         if (accountsService.deleteAccount(mobileNumber)) {
             return ResponseEntity
                     .status(HttpStatus.OK)
